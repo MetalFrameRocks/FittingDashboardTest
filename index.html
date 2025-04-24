@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Data Submission</title>
+  <style>
+    body {
+      background-image: url('3.jpg');
+      background-size: cover;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.2); /* Semi-transparent black background */
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: white;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+      margin-top: 40px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .form-container {
+      background: rgba(255, 255, 255, 0.90);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    .form-container img {
+      width: 200px;
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1976D2;
+    }
+
+    .message {
+      margin-top: 15px;
+      font-size: 14px;
+      color: green;
+      font-weight: bold;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 16px;
+      color: white;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      padding: 10px 0;
+      background-color: rgba(0, 0, 0, 1); /* <-- Add this line */
+      width: 100%; /* Ensures it stretches full width */
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <h1> 👓 METAL FRAME FITTING</h1>
+
+  <div class="container">
+    <div class="form-container">
+      <img src="4.png" alt="Logo">
+      <input type="text" id="model" placeholder="Model Number" onkeydown="goToNext(event, 'quantity')">
+      <input type="number" id="quantity" placeholder="Quantity" onkeydown="submitOnEnter(event)">
+      <button onclick="submitData()">Submit</button>
+      <div id="message" class="message"></div> <!-- Message shown here -->
+    </div>
+  </div>
+
+  <div class="footer">
+    Made with ❤️ by  Deepanshu and Govind
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>  
+
+  <script>
+    const firebaseConfig = {
+    apiKey: "AIzaSyBpRn691XmSWFghN96HX7U0iTMzNlSKkIU",
+    authDomain: "metal-frame-fitting-fbef7.firebaseapp.com",
+    projectId: "metal-frame-fitting-fbef7",
+    storageBucket: "metal-frame-fitting-fbef7.firebasestorage.app",
+    messagingSenderId: "768978465778",
+    appId: "1:768978465778:web:68466630de77394593b16b"
+  };
+
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function submitData() {
+      const model = document.getElementById("model").value.trim();
+      const quantity = parseInt(document.getElementById("quantity").value.trim());
+      const messageDiv = document.getElementById("message");
+
+      if (!model || isNaN(quantity)) {
+        messageDiv.textContent = "⚠️ Please fill in both fields correctly.";
+        messageDiv.style.color = "red";
+        return;
+      }
+
+      try {
+        await db.collection("submissions").add({
+          model: model,
+          quantity: quantity,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById("model").value = "";
+        document.getElementById("quantity").value = "";
+        document.getElementById("model").focus();
+
+        messageDiv.textContent = "✅ Data submitted successfully!";
+        messageDiv.style.color = "green";
+
+        // Optional: Clear the message after 3 seconds
+        setTimeout(() => {
+          messageDiv.textContent = "";
+        }, 3000);
+
+      } catch (e) {
+        messageDiv.textContent = "❌ Error submitting data.";
+        messageDiv.style.color = "red";
+        console.error(e);
+      }
+    }
+
+    function goToNext(event, nextFieldId) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        document.getElementById(nextFieldId).focus();
+      }
+    }
+
+    function submitOnEnter(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        submitData();
+      }
+    }
+  </script>
+</body>
+</html>
